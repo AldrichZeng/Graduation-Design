@@ -1,7 +1,8 @@
 import torch
 import numpy as np
 import vgg
-
+import helper
+import LeNet
 # 针对VGG网络的剪枝
 def replace_layers(module,old_mod,new_mod):
     """
@@ -12,7 +13,7 @@ def replace_layers(module,old_mod,new_mod):
     :return:
     """
     for i in range(len(old_mod)):
-        if module is old_mod[i]: # 若来自同一个对象，如：都是Conv2d或都是Batch Norm
+        if module is old_mod[i]: # 若来自同一个对象，如：都是引用自同一个Conv2d或都是引用自同一个Batch Norm
             return new_mod[i]   # 返回第i个层结构
     return module
 
@@ -196,7 +197,7 @@ def select_and_prune_filter(model,ord,layer_index=0,num_to_prune=0,percent_of_pr
     选择卷积层，并剪枝
     :param model: VGG或ResNet模型，net model
     :param ord: 整数，which norm to compute as the standard. Support l1 and l2 norm
-    :param layer_index: 整数，layer in which the filters being pruned. If being set to 0, all conv layers will be pruned.
+    :param layer_index: 整数，减去的是第几个全连接层. If being set to 0, all conv layers will be pruned.
     :param num_to_prune: 整数，要被剪枝的卷积核数目。number of filters to prune. Disabled if percent_of_pruning is not 0
     :param percent percent_of_pruning: 压缩率。percent of filters to prune for one conv
     :return: filter indexes in the [layer_index] layer
@@ -225,7 +226,7 @@ def select_and_prune_filter(model,ord,layer_index=0,num_to_prune=0,percent_of_pr
         if num_to_prune is not 0:
             print('Warning: Param: num_to_prune disabled!')
         num_to_prune=int(conv.out_channels * percent_of_pruning)  # 计算要剪枝的通道数
-
+    print("对第"+str(layer_index)+"个卷积层减去"+str(num_to_prune)+"个卷积核")
     '''
     获取要剪枝的层的weight
     '''
@@ -249,29 +250,37 @@ def select_and_prune_filter(model,ord,layer_index=0,num_to_prune=0,percent_of_pr
                            layer_index,
                            filter_min_norm_index[:num_to_prune])  # 选取最小的num_prune个filter
 
+    # # 对全连接层进行剪枝
+    # sparsity=50  # 稀疏率
+    # model,mask = prune_fc_layer(model,fc_layer_index,sparsity)
+
+    # todo：fine-tune
+
+
     return model
 
 
-def prune_fc_layer(model, layer_index, sparsity):
+def prune_fc_layer(model, fc_layer_index, sparsity):
     """
-    对全连接层剪枝（矩阵稀疏化）
+    对全连接层剪枝（矩阵稀疏化）,生成一个model，并用mask_dict保存所有的mask
     :param model: 定义的模型，ResNet或VGG
-    :param layer_index: 整数，减去的是第几个全连接层(对于VGG而言，layer_index只能为1或2,因最后一层不可剪枝)
+    :param fc_layer_index: 整数，减去的是第几个全连接层(对于VGG而言，layer_index只能为1或2,因最后一层不可剪枝)
     :param sparsity: 整数，稀疏率
-    :return:
+    :param mask: 字典，{fc_layer_index:mask}
+    :return:model和mask_dict
     """
     '''确定要剪枝的Linear层'''
     i=0
     old_fc=None  # 旧的FC层
     for mod in model.classifier:
-        i+=1
-        if i==layer_index:
-            old_fc=mod
-            break
-        else:
-            continue
-
+        if isinstance(mod,torch.nn.Linear):
+            i += 1
+            if i == fc_layer_index:
+                old_fc = mod
+                break
+    print("对第"+str(fc_layer_index)+"个全连接层稀疏化")
     new_fc = torch.nn.Linear(old_fc.in_features, old_fc.out_features)  # 确定新的Linear层的形状
+    # helper.print_net_weights(model,fc_layer_index=[2])
 
     old_weights = old_fc.weight.data.cpu().numpy()
     new_weights=new_fc.weight.data.cpu().numpy()
@@ -283,16 +292,111 @@ def prune_fc_layer(model, layer_index, sparsity):
     temp=old_weights*mask
     new_weights[:]=temp[:]  # 获得一个剪枝后的矩阵
 
-    '''用新的FC层代替旧的FC层'''
+    if torch.cuda.is_available():
+        new_fc.cuda()
+    '''用新的FC层代替旧的FC层(下面的代码不能删除，否则会出现返回后的model是未稀疏化的)'''
     model.classifier = torch.nn.Sequential(
         *(replace_layers(mod, [old_fc], [new_fc]) for mod in model.classifier))
+    # helper.print_net_weights(model,fc_layer_index=[fc_layer_index])
+    return model, mask
 
-    return model
+
+def select_and_prune_fc(model,layer_list,sparsity):
+    """
+
+    :param model:
+    :param layer_list: 整数列表，保存要剪枝的layer_index
+    :param sparsity: 整数，稀疏率
+    :return:mask_dict 字典，{layer_index:mask}
+    """
+    num_fc=0  # 用于计算全连接层数量
+    mask_dict={}  # 字典，用于保存mask
+    for mod in model.classifier:
+        if isinstance(mod,torch.nn.Linear):
+            num_fc+=1
+    for layer_index in range(1,num_fc):  # 对于VGG而言，layer_index取值为1,2
+        if layer_index in layer_list:
+            # 对第layer_index个卷积层剪枝
+            model,mask=prune_fc_layer(model,
+                                      fc_layer_index=layer_index,
+                                      sparsity=sparsity)
+            mask_dict[layer_index]=mask  # 加入字典中
+    return model,mask_dict
+
+
+def select_and_prune_conv(model,layer_list,sparsity):
+    num_conv=0  # 计算卷积层数量
+    mask_dict={}  # 字典，用于保存mask
+    for mod in model.features:
+        if isinstance(mod,torch.nn.modules.conv.Conv2d):
+            num_conv+=1
+    for layer_index in range(1,num_conv+1):
+        if layer_index in layer_list:
+            model,mask=sparsify_conv_layer(model,
+                                           conv_layer_index=layer_index,
+                                           sparsity=sparsity)
+            mask_dict[layer_index]=mask
+    return model,mask_dict
+
+def sparsify_conv_layer(model,conv_layer_index,sparsity):
+    """
+    根据稀疏率对Conv层剪枝，减的是权重
+    :return:
+    """
+    i=0
+    old_conv=None
+    for mod in model.features:
+        if isinstance(mod,torch.nn.modules.conv.Conv2d):
+            i+=1
+            if i==conv_layer_index:
+                old_conv=mod
+                break
+
+    if old_conv is not None:
+        new_conv=torch.nn.Conv2d(in_channels=old_conv.in_channels,
+                                 out_channels=old_conv.out_channels,
+                                 kernel_size=old_conv.kernel_size,
+                                 stride=old_conv.stride,
+                                 padding=old_conv.padding,
+                                 dilation=old_conv.dilation,
+                                 groups=old_conv.groups,
+                                 bias=(old_conv.bias is not None))
+        old_weights=old_conv.weight.data.cpu().numpy()
+        new_weights=new_conv.weight.data.cpu().numpy()
+        # 注意，new_weight是4维矩阵
+
+        '''矩阵稀疏化'''
+        new_weights_abs = torch.abs(new_conv.weight)  # 对一个Tensor求每一个元素的绝对值
+        threshold = np.percentile(new_weights_abs.data.cpu().numpy(), sparsity)  # 确定阈值
+        mask = np.abs(old_weights) > threshold  # 得到一个Bool型的矩阵
+        temp = old_weights * mask
+        new_weights[:] = temp[:]  # 获得一个剪枝后的矩阵
+
+        if torch.cuda.is_available():
+            new_conv.cuda()
+
+        model.features=torch.nn.Sequential(
+            *(replace_layers(mod,[old_conv],[new_conv]) for mod in model.features)
+        )
+
+        return model,mask
+
 
 
 if __name__ == "__main__":
-    model= vgg.vgg16_bn(pretrained=True)
+    # model= vgg.vgg16_bn(pretrained=False)
+    model = LeNet.lenet5().to("cuda")
+    # print(model)
+    model,mask_dict=select_and_prune_conv(model,layer_list=[1,2],sparsity=50)
+    # helper.print_net_weights(model,conv_layer_index=[1,2],fc_layer_index=[])
+    for i in mask_dict:
+        print(mask_dict[i])
+    # helper.print_net_weights(model,conv_layer_index=[],fc_layer_index=[1,2])
     # select_and_prune_filter(model,layer_index=3,num_to_prune=2,ord=2)
-    # prune_conv_layer(model,layer_index=3,filter_index=[0,1,2])
-    prune_fc_layer(model,layer_index=1,sparsity=50)
+    # prune_conv_layer(model,layer_index=1,filter_index=[0,1,2])
+    # model,_=prune_fc_layer(model,fc_layer_index=2,sparsity=50)
     # print(model.classifier[0].weight.data.cpu().numpy())
+    # model,mask_dict=select_and_prune_fc(model, layer_list=[1,2], sparsity=50)
+    # helper.print_net_weights(model,fc_layer_index=[1,2],conv_layer_index=[])
+    # select_and_prune_filter(model,layer_index=1,num_to_prune=2,ord=2)
+    # print(model)
