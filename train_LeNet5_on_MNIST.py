@@ -25,22 +25,30 @@ def get_highestAccuracy_From_File(root=ROOT, fileName="accuracy.txt"):
     print("读入最高精确度 highest_accuracy = " + str(highest_accuracy))
     return highest_accuracy
 
-def get_globalStep_From_File(net, root=ROOT, fileName="global_step.txt"):
-    path = root + fileName
-    global_step = 0
-    if os.path.exists(path):  # 若存在文件
-        f = open(path, 'r')  # 只读方式打开文件（txt文件）
-        global_step = int(f.read())  # 强制转换问int
-        f.close()  # 关闭文件
-        print("读入全局迭代数 global_step = " + str(global_step))
-        #todo: 如果要读取剪枝后的模型，请修改路径
-        state_dict_saved_at = root + 'checkpoints/stateDict_' + str(global_step) + '.pth'  # 模型参数保存的路径
-        # model_save_at=root + 'checkpoints/model_' + str(global_step) + '.pth'  # 模型结构保存的路径
-        # net = torch.load(model_save_at)
+def get_globalStep_From_File(net, root=ROOT, fileName="global_step.txt",check_point_path="checkpoints",h_accuracy="",stateDict=""):
+    if stateDict!="":
+        strList=stateDict.split("_")
+        global_step=int(strList[1])
+        state_dict_saved_at=root+check_point_path+'/'+stateDict
         if os.path.exists(state_dict_saved_at):
-            print('load model from file \"' + state_dict_saved_at+"\" ")
-            net.load_state_dict(torch.load(state_dict_saved_at))  # 加载模型的state_dict
-    return global_step,net
+            net.load_state_dict(torch.load(state_dict_saved_at))
+        return global_step,net
+    else:
+        path = root + fileName
+        global_step = 0
+        if os.path.exists(path):  # 若存在文件
+            f = open(path, 'r')  # 只读方式打开文件（txt文件）
+            global_step = int(f.read())  # 强制转换问int
+            f.close()  # 关闭文件
+            print("读入全局迭代数 global_step = " + str(global_step))
+            #todo: 如果要读取剪枝后的模型，请修改路径
+            state_dict_saved_at = root + check_point_path+'/stateDict_' + str(global_step) + h_accuracy+'.pth'  # 模型参数保存的路径
+            # model_save_at=root + 'checkpoints/model_' + str(global_step) + '.pth'  # 模型结构保存的路径
+            # net = torch.load(model_save_at)
+            if os.path.exists(state_dict_saved_at):
+                print('load model from file \"' + state_dict_saved_at+"\" ")
+                net.load_state_dict(torch.load(state_dict_saved_at))  # 加载模型的state_dict
+        return global_step,net
 
 
 def save_Model_and_StateDict(net, global_step, highest_accuracy):
