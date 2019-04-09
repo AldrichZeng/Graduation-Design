@@ -12,3 +12,4 @@
 2. 《Leaning both Weights and Connections for Efficient Neural Networks》
 3. 《Pruning Filters For Efficient ConvNets》
 4. 《Speeding-up Convolutional Neural Networks Using Fine-tuned CP-decomposition》
+5. 《Compression of Deep Convolutional Neural Networks for Fast and Low Power Mobile Applications》
