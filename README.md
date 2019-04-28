@@ -25,6 +25,12 @@
 
 
 ————2019年4月28日
+# 卷积核剪枝
+#### LeNet-5 on MNIST-10
+
+#### AlextNet on CIFAR-10
+
+#### VGG-16 on CIFAR-10
 
 #### 参考论文
 1. 《Deep compression - Compressing Deep Neural Networks With Pruning, Tranied Quantization And Huffman Coding》
@@ -44,6 +50,7 @@
 |90%|0.8732|>0.9788||0.001||256|
 
 ————2019年4月9日
+# Tucker分解
 
 #### 参考论文
 4. 《Speeding-up Convolutional Neural Networks Using Fine-tuned CP-decomposition》
