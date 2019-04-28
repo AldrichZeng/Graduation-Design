@@ -3,14 +3,14 @@
 
 # 权重剪枝（sparsify）
 
-#### LeNet-5 on MNIST-10（卷积层）
-|剪枝率|首次测试|accuracy|迭代次数|学习率|学习率衰减|batch_size|
-|:-----|:------|:-------|:------|:-----|:--------|:---------|
-|0%    |/      |0.9902  |185    | 0.001|无       |256|
-|50%   |0.9883 |0.9898  |154    |0.001 |无       |256|
-|90%   |       |        |       |      |         ||
+#### LeNet-5 on MNIST-10
+|层  |剪枝率|首次测试|accuracy|迭代次数|学习率|学习率衰减|batch_size|
+|:---|:-----|:------|:-------|:------|:-----|:--------|:---------|
+|Conv|0%    |/      |0.9902  |185    | 0.001|无       |256|
+|Conv|50%   |0.9883 |0.9898  |154    |0.001 |无       |256|
+|Conv|90%   |0.3572 |        |       |      |         ||
 
-#### AlextNet on CIFAR-10（卷积层）
+#### AlextNet on CIFAR-10
 考虑到梯度下降的收敛速度，采用Adam优化器：
 `betas=(0.9, 0.999), eps=1e-08, weight_decay=0`
 
@@ -23,9 +23,9 @@
 |FC  |90%   |0.|0.   |    |0.001 |0.1/100epoch|128||
 
 #### VGG-16 on CIFAR-10
-|剪枝率|首次测试|accuracy|迭代次数|学习率|学习率衰减|batch_size|
-|:-----|:------|:-------|:------|:-----|:--------|:---------|
-|0%    |/      |0.6552  |网上下载|      |         |16|
+|剪枝率|首次测试|accuracy|迭代次数|学习率|学习率衰减|batch_size|备注|
+|:-----|:------|:-------|:------|:-----|:--------|:---------|:--|
+|0%    |/      |0.6552  |       |      |         |16|vgg16_bn-6c64b313.pth|
 |50%   |       |  |     |       |      |         |16|
 
 
@@ -60,3 +60,10 @@
 #### 参考论文
 4. 《Speeding-up Convolutional Neural Networks Using Fine-tuned CP-decomposition》
 5. 《Compression of Deep Convolutional Neural Networks for Fast and Low Power Mobile Applications》
+
+
+### 环境
++ NVIDIA GeForce RTX 2070
++ Ubuntu 16.04
++ 内存32G，CPU i7-8700，SSD 500G
++ cuda9.0，cuDNN 7.0
