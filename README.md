@@ -1,7 +1,7 @@
-# 基于剪枝的神经网络压缩与加速
+### 基于剪枝的神经网络压缩与加速
 ###### 曾曜 - 本科毕业设计 指导老师：李文中（南京大学）、陆伟（西北工业大学）
 
-### 剪枝（稀疏化）
+# 权重剪枝（sparsify）
 
 #### LeNet-5 on MNIST-10
 |剪枝率|首次测试|accuracy|迭代次数|学习率|学习率衰减|batch_size|
@@ -31,7 +31,7 @@
 2. 《Leaning both Weights and Connections for Efficient Neural Networks》
 3. 《Pruning Filters For Efficient ConvNets》
 
-### CP分解
+# CP分解
 对于未剪枝的LeNet-5的模型，采用CP分解后，首次测试准确率为0.11，经过多次迭代后可以达到90%以上。
 
 对于剪枝率90%的LeNet-5模型，采用CP分解后，首次测试准确率为0.8732，经过一次迭代后，就可以达到Accuracy : 0.9788
