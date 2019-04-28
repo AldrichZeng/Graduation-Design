@@ -1,9 +1,9 @@
-### 基于剪枝的神经网络压缩与加速
+### 课题：基于剪枝的神经网络压缩与加速
 ###### 曾曜 - 本科毕业设计 指导老师：李文中（南京大学）、陆伟（西北工业大学）
 
-# 权重剪枝（sparsify）
+# 一、权重剪枝（sparsify）
 
-#### LeNet-5 on MNIST-10
+#### 1、LeNet-5 on MNIST-10
 |层  |剪枝率|首次测试|首次迭代|acc|Epoch|学习率|学习率衰减|batch|
 |:---|:-----|:-------|:------|:-------|:------|:-----|:--------|:---------|
 |    |0%    |/       |/      |0.9902  |185    | 0.001|无       |256|
@@ -12,7 +12,7 @@
 |FC  |50%   |0.9832|0.9878 |0.9893  |287    |0.001 |0.1/50epoch|128|
 |FC  |90%   |0.9771  |0.8857 |0.9865  |166    |0.001 |0.1/50epoch|128|
 
-#### AlextNet on CIFAR-10
+#### 2、AlextNet on CIFAR-10
 考虑到梯度下降的收敛速度，采用Adam优化器：
 `betas=(0.9, 0.999), eps=1e-08, weight_decay=0`
 
@@ -24,7 +24,7 @@
 |FC  |50%   |0.6831 |0.6873   |0.7245  |283    |0.001 |0.1/50epoch|128||
 |FC  |90%   |0.     |0.       |0.      |       |0.001 |0.1/100epoch|128||
 
-#### VGG-16 on CIFAR-10
+#### 3、VGG-16 on CIFAR-10
 |层  |剪枝率|首次测试|acc|Epoch|学习率|学习率衰减|batch|备注|
 |:---|:-----|:------|:-------|:------|:-----|:--------|:---------|:--|
 |    |0%    |/      |  |       |      |         |16||
@@ -32,32 +32,32 @@
 
 
 ————2019年4月28日
-# 卷积核剪枝
-#### LeNet-5 on MNIST-10
+# 二卷积核剪枝
+#### 1、LeNet-5 on MNIST-10
 
-#### AlextNet on CIFAR-10
+#### 2、AlextNet on CIFAR-10
 
-#### VGG-16 on CIFAR-10
+#### 3、VGG-16 on CIFAR-10
 
 #### 参考论文
 1. 《Deep compression - Compressing Deep Neural Networks With Pruning, Tranied Quantization And Huffman Coding》
 2. 《Leaning both Weights and Connections for Efficient Neural Networks》
 3. 《Pruning Filters For Efficient ConvNets》
 
-# CP分解
+# 三、CP分解
 对于未剪枝的LeNet-5的模型，采用CP分解后，首次测试准确率为0.11，经过多次迭代后可以达到90%以上。
 
 对于剪枝率90%的LeNet-5模型，采用CP分解后，首次测试准确率为0.8732，经过一次迭代后，就可以达到Accuracy : 0.9788
 
 学习率是否要很小？学习率依旧选取0.001，如果太小会难以收敛，训练效果并不好。
-#### LeNet-5 on MNIST-10
+#### 1、LeNet-5 on MNIST-10
 |剪枝率|首次测试|acc|Epoch|学习率|学习率衰减|batch|
 |:-----|:------|:-------|:------|:-----|:--------|:---------|
 |0%    |0.11   |>0.90||0.001||256|
 |90%|0.8732|>0.9788||0.001||256|
 
 ————2019年4月9日
-# Tucker分解
+# 四、Tucker分解
 
 #### 参考论文
 4. 《Speeding-up Convolutional Neural Networks Using Fine-tuned CP-decomposition》
