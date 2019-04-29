@@ -30,6 +30,9 @@
 |    |0%    |/      |  |       |      |         |16||
 |Conv|50%   |       |  |     |       |          |16||
 
+#### 参考论文
+1. 《Deep compression - Compressing Deep Neural Networks With Pruning, Tranied Quantization And Huffman Coding》
+2. 《Leaning both Weights and Connections for Efficient Neural Networks》
 
 ————2019年4月28日
 # 二、卷积核剪枝
@@ -40,8 +43,6 @@
 #### 3、VGG-16 on CIFAR-10
 
 #### 参考论文
-1. 《Deep compression - Compressing Deep Neural Networks With Pruning, Tranied Quantization And Huffman Coding》
-2. 《Leaning both Weights and Connections for Efficient Neural Networks》
 3. 《Pruning Filters For Efficient ConvNets》
 
 # 三、CP分解
@@ -56,11 +57,14 @@
 |0%    |0.11   |>0.90||0.001||256|
 |90%|0.8732|>0.9788||0.001||256|
 
+
+#### 参考论文
+4. 《Speeding-up Convolutional Neural Networks Using Fine-tuned CP-decomposition》
+
 ————2019年4月9日
 # 四、Tucker分解
 
 #### 参考论文
-4. 《Speeding-up Convolutional Neural Networks Using Fine-tuned CP-decomposition》
 5. 《Compression of Deep Convolutional Neural Networks for Fast and Low Power Mobile Applications》
 
 
