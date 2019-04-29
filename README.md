@@ -24,12 +24,14 @@
 |FC  |50%   |0.6831 |0.6873   |0.7245  |283    |0.001 |0.1/50epoch|128||
 |FC  |90%   |0.6857 |0.7080   |0.7508  |458    |0.001 |0.1/100epoch|128||
 
-#### 3、VGG-16 on CIFAR-10
-|层  |剪枝率|首次测试|acc|Epoch|学习率|学习率衰减|batch|备注|
-|:---|:-----|:------|:-------|:------|:-----|:--------|:---------|:--|
-|    |0%    |/      |  |       |      |         |16||
-|Conv|50%   |       |  |     |       |          |16||
-
+#### 3、VGG-16_bn on CIFAR-10
+|层  |剪枝率|首次测试|首次迭代|acc|Epoch|学习率|学习率衰减|batch|备注|
+|:---|:-----|:------|:------|:--|:------|:-----|:--------|:---------|:--|
+|    |0%    |/     |   |  |       |      |         |16||
+|Conv|50%   |      |   |  |     |       |          |16||
+|Conv|90%   |      |   |  |     |       |          |16||
+|FC|50%   |      |   |  |     |       |          |16||
+|FC|90%   |      |   |  |     |       |          |16||
 #### 参考论文
 1. 《Deep compression - Compressing Deep Neural Networks With Pruning, Tranied Quantization And Huffman Coding》
 2. 《Leaning both Weights and Connections for Efficient Neural Networks》
