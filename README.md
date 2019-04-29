@@ -28,10 +28,10 @@
 |层  |剪枝率|首次测试|首次迭代|acc|Epoch|学习率|学习率衰减|batch|备注|
 |:---|:-----|:------|:------|:--|:------|:-----|:--------|:---------|:--|
 |    |0%    |/     |   |  |       |      |         |16||
-|Conv|50%   |      |   |  |     |       |          |16||
-|Conv|90%   |      |   |  |     |       |          |16||
-|FC|50%   |      |   |  |     |       |          |16||
-|FC|90%   |      |   |  |     |       |          |16||
+|Conv|50%   |0.0003 |0.2671 |   |     |0.001 |0.1/50epoch|16|   |
+|Conv|90%   |      |   |  |     |       |          |16|     |
+|FC|50%   |      |   |  |     |       |          |16|     |
+|FC|90%   |      |   |  |     |       |          |16|     |
 #### 参考论文
 1. 《Deep compression - Compressing Deep Neural Networks With Pruning, Tranied Quantization And Huffman Coding》
 2. 《Leaning both Weights and Connections for Efficient Neural Networks》
